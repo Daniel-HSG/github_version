@@ -69,7 +69,6 @@ function createWindows() {
   // If there's a second display, create a window there
   if (displays.length > 1) {
     const secondaryDisplay = displays.find((d) => d.id !== primaryDisplay.id);
-
     if (secondaryDisplay) {
       secondWindow = new BrowserWindow({
         width: secondaryDisplay.size.width,
@@ -77,7 +76,7 @@ function createWindows() {
         x: secondaryDisplay.bounds.x,
         y: secondaryDisplay.bounds.y,
         // Set fullscreen for the secondary window
-        fullscreen: true,
+        fullscreen: true,  // Bereits im Vollbildmodus
         // Remove menu bar
         autoHideMenuBar: true,
         // Remove frame (title bar and borders)
@@ -103,6 +102,11 @@ function createWindows() {
       secondWindow.on('closed', () => {
         secondWindow = null;
       });
+      
+      // Standard-Zoom um zwei Stufen erhöhen
+      secondWindow.webContents.on('did-finish-load', () => {
+        secondWindow.webContents.setZoomFactor(1.2);
+      });
     }
   }
 
@@ -127,6 +131,13 @@ function createWindows() {
   // Handle fullscreen toggle request
   ipcMain.on('toggle-fullscreen-main', () => {
     mainWindow.setFullScreen(!mainWindow.isFullScreen());
+  });
+  
+  // Vollbildmodus-Taste für Kontrollbildschirm
+  ipcMain.on('toggle-fullscreen-control', () => {
+    if (secondWindow && !secondWindow.isDestroyed()) {
+      secondWindow.setFullScreen(!secondWindow.isFullScreen());
+    }
   });
 
   // Set up communication for zoom controls

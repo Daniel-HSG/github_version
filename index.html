@@ -110,7 +110,6 @@
     right: 10%; /* Keep original position on secondary display */
 }
 
-
         .haltenblau, .haltenweis {
             position: absolute;
             border-radius: 10px;
@@ -420,7 +419,6 @@
   background-color: darkblue;
 }
 
-
 /* Animation ################################################################################### */
 /* Basis-Styling für die Matte-Animation */
 .matte-animation {
@@ -498,7 +496,6 @@
 
 /* Animation ################################################################################### */
 
-
 .kampfStartenButton {
   position: absolute;
   bottom: 24%;
@@ -546,7 +543,6 @@
 .animation-button:hover{
   background-color: #555;
 }
-
 
     </style>
     <script>
@@ -779,8 +775,6 @@
   }
 }
 
-
-
 // Function to hide matte animation and start the match
 function startKampf() {
   console.log("startKampf function called");
@@ -850,7 +844,6 @@ function startKampf() {
   updateHauptTimer();
 }
 
-
 // Replace the videoEnde function with this
 function animationEnde() {
   playMatteAnimation();
@@ -872,6 +865,8 @@ function buttonweiter() {
     if ((winnerweis == true) || (winnerblau == true) || (unentschieden == true)) {
         // Second click: reset everything
         
+        // Change button text back to "Ergebnis"
+        weiterbutton.textContent = "Ergebnis";
         
         // Hide winner displays
         wb.style.visibility = "hidden";
@@ -901,6 +896,9 @@ function buttonweiter() {
         playMatteAnimation();
     } else if (punkteblau >= 20 || punkteweis >= 20 || hauptTimer.getTime() >= kampfzeit) {
         // First click: show winner
+        // Change button text to "Ende"
+        weiterbutton.textContent = "Ende";
+        
         if (punkteblau > punkteweis) {
             winnerblau = true;
             wb.classList.add("blinkanim");
@@ -936,8 +934,6 @@ function buttonweiter() {
         }
     }
 }
-
-
 
        function ipponblau(){
             mpunkteblau = punkteblau
@@ -1113,20 +1109,20 @@ function buttonweiter() {
 
         // Haltegriff logic for awarding points
         halteTimerW.setSchedule(() => {
-            yukoweis(); // Award Yuko after 10 seconds for white
-        }, 10000);
+            yukoweis(); // Award Yuko after 5 seconds for white
+        }, 5000);
         halteTimerB.setSchedule(() => {
-            yukoblau(); // Award Yuko after 10 seconds for blue
-        }, 10000);
+            yukoblau(); // Award Yuko after 5 seconds for blue
+        }, 5000);
 
         halteTimerW.setSchedule(() => {
             punkteweis -= 3; // Remove Yuko points
-            wazariweis(); // Award Waza-ari after 15 seconds
-        }, 15000);
+            wazariweis(); // Award Waza-ari after 10 seconds
+        }, 10000);
         halteTimerB.setSchedule(() => {
             punkteblau -= 3; // Remove Yuko points
-            wazariblau(); // Award Waza-ari after 15 seconds
-        }, 15000);
+            wazariblau(); // Award Waza-ari after 10 seconds
+        }, 10000);
 
         halteTimerW.setSchedule(() => {
             punkteweis -= 5; // Remove Waza-ari points
@@ -1294,7 +1290,6 @@ if (typeof require !== 'undefined') {
   }
 });
 
-
     } else {
       // This is the main window - send updates to the secondary window
       
@@ -1322,7 +1317,6 @@ if (typeof require !== 'undefined') {
     matteNumber: matteinput.value || "1"
   };
 }
-
 
       
       // Send current state when secondary window is ready
@@ -1519,7 +1513,6 @@ function submitMattenNummer() {
   }
 }
 
-
 // Show the modal when the page loads
 document.addEventListener('DOMContentLoaded', function() {
   // Hide the original matteinput field since we're using the modal
@@ -1563,7 +1556,6 @@ if (typeof require !== 'undefined') {
 });
 
 }
-
 
     </script>
 </head>
@@ -1622,7 +1614,7 @@ if (typeof require !== 'undefined') {
         <div onclick = "minusweis()" class="minusw onlymain">Z</div>
         <div onclick = "punktebenull()" class="punktebn onlymain">0</div>
         <div onclick = "punktewenull()" class="punktewn onlymain">0</div>
-        <button id="weiterbutton" class="weiterbutton hidden onlymain" onclick="buttonweiter()">Weiter</button>
+        <button id="weiterbutton" class="weiterbutton hidden onlymain" onclick="buttonweiter()">Ergebnis</button>
     </div>
     <div class="timercontrols onlymain">
         <div onclick = "resetHauptTimer()" class="haupttimerreset onlymain">0</div>
