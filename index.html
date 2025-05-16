@@ -898,6 +898,12 @@ function buttonweiter() {
         // First click: show winner
         // Change button text to "Ende"
         weiterbutton.textContent = "Ende";
+
+         // Disable the button for 1 second to prevent accidental clicks
+        weiterbutton.disabled = true;
+        setTimeout(() => {
+            weiterbutton.disabled = false;
+        }, 1000);
         
         if (punkteblau > punkteweis) {
             winnerblau = true;
