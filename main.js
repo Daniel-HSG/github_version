@@ -12,6 +12,7 @@ log.info('App startet...')
 autoUpdater.autoDownload = true           // Updates automatisch herunterladen
 autoUpdater.autoInstallOnAppQuit = true   // Updates automatisch installieren, wenn die App beendet wird
 
+
 // Auto-Updater konfigurieren
 function setupAutoUpdater() {
   // Prüfe auf Updates beim Start

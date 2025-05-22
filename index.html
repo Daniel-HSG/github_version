@@ -9,7 +9,26 @@
             font-family: Verdana, Geneva, Tahoma, sans-serif;
             font-weight: 900;
         }
-        
+        .resetbutton {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: #ff3333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.resetbutton:hover {
+    background-color: #cc0000;
+}
+
+
         .onlymain:not(.main .onlymain) {
             display: none;
         }
@@ -546,6 +565,88 @@
 
     </style>
     <script>
+// Einfache Reset-Funktion mit Strg+R-Unterstützung
+window.onload = function() {
+    // Reset-Button-Funktionalität
+    const resetButton = document.getElementById('resetButton');
+    if (resetButton) {
+        resetButton.addEventListener('click', function() {
+            if (confirm("Anwendung neu starten? Aktuelle Daten gehen verloren.")) {
+                // Mattennummer und Startzeit speichern
+                const matteNumber = document.getElementById('matteinput')?.value || "1";
+                const startzeit = document.getElementById('haupttimerinput')?.value || "2:00";
+                
+                // Temporäre Werte in sessionStorage speichern
+                sessionStorage.setItem('matteNumber', matteNumber);
+                sessionStorage.setItem('startzeit', startzeit);
+                sessionStorage.setItem('isReset', 'true');
+                
+                // Seite neu laden
+                window.location.reload();
+            }
+        });
+    }
+    
+    // Tastenkombination Strg+R für Reset
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.key === 'r') {
+            event.preventDefault();
+            if (resetButton) resetButton.click();
+        }
+    });
+    
+    // Werte nach Reset wiederherstellen
+    if (sessionStorage.getItem('isReset') === 'true') {
+        // Mattennummer wiederherstellen
+        const matteNumber = sessionStorage.getItem('matteNumber');
+        if (matteNumber) {
+            const matteInput = document.getElementById('matteinput');
+            if (matteInput) {
+                matteInput.value = matteNumber;
+                
+                // Headline aktualisieren
+                const headline = document.querySelector('.headline');
+                if (headline) headline.textContent = `Matte ${matteNumber}`;
+            }
+        }
+        
+        // Startzeit wiederherstellen
+        const startzeit = sessionStorage.getItem('startzeit');
+        if (startzeit && document.getElementById('haupttimerinput')) {
+            document.getElementById('haupttimerinput').value = startzeit;
+            
+            // Kampfzeit aktualisieren, falls vorhanden
+            if (typeof kampfzeit !== 'undefined') {
+                const teile = startzeit.split(":");
+                kampfzeit = ((parseInt(teile[0]) * 60) + parseInt(teile[1])) * 1000;
+                
+                // Timer aktualisieren
+                if (typeof updateHauptTimer === 'function') updateHauptTimer();
+            }
+        }
+        
+        // Reset-Flag zurücksetzen
+        sessionStorage.removeItem('isReset');
+
+    }
+};
+
+// Überschreibe die showMattenModal-Funktion, um gespeicherte Werte zu berücksichtigen
+const originalShowMattenModal = window.showMattenModal;
+window.showMattenModal = function() {
+    if (sessionStorage.getItem('isReset') === 'true' && sessionStorage.getItem('matteNumber')) {
+        // Wenn ein Reset durchgeführt wurde und eine Mattennummer gespeichert ist,
+        // zeige das Modal nicht an
+        return;
+    }
+    
+    // Sonst zeige das Modal wie gewohnt an
+    if (typeof originalShowMattenModal === 'function') {
+        originalShowMattenModal();
+    }
+};
+
+
         class Timer {
             static #rootTimer = {
                 getTime: () => new Date().getTime(),
@@ -711,30 +812,32 @@
             hblau.innerHTML = padString(zeit, 2, "0");
             if (anzeige !== null) anzeige.hblau.innerHTML = hblau.innerHTML
         }
-
         function updatePunkteB() {
-            pblau.innerHTML = padString(punkteblau, 2, "0");
-            if (anzeige !== null) anzeige.pblau.innerHTML = pblau.innerHTML;
-            if (punkteblau >= 20) {
-                fzeitlauft();
-                weiterbutton.classList.remove("hidden");
-                if (!halteTimerB.paused()) {
-                    buzzer.play(); // Play sound when points reach 20 due to Haltegriff
-                }
-            }
+    pblau.innerHTML = padString(punkteblau, 2, "0");
+    if (anzeige !== null) anzeige.pblau.innerHTML = pblau.innerHTML;
+    if (punkteblau >= 20) {
+        if (!halteTimerB.paused()) {
+        } else {
+            // Nur den Haupttimer anhalten, wenn kein Haltegriff aktiv ist
+            fzeitlauft();
+            weiterbutton.classList.remove("hidden"); // Weiterbutton nur anzeigen, wenn der Timer gestoppt ist
         }
+    }
+}
 
-        function updatePunkteW() {
-            pweis.innerHTML = padString(punkteweis, 2, "0");
-            if (anzeige !== null) anzeige.pweis.innerHTML = pweis.innerHTML;
-            if (punkteweis >= 20) {
-                fzeitlauft();
-                weiterbutton.classList.remove("hidden");
-                if (!halteTimerW.paused()) {
-                    buzzer.play(); // Play sound when points reach 20 due to Haltegriff
-                }
-            }
+function updatePunkteW() {
+    pweis.innerHTML = padString(punkteweis, 2, "0");
+    if (anzeige !== null) anzeige.pweis.innerHTML = pweis.innerHTML;
+    if (punkteweis >= 20) {
+        if (!halteTimerW.paused()) {
+        } else {
+            // Nur den Haupttimer anhalten, wenn kein Haltegriff aktiv ist
+            fzeitlauft();
+            weiterbutton.classList.remove("hidden"); // Weiterbutton nur anzeigen, wenn der Timer gestoppt ist
         }
+    }
+}
+
 
         function updateMatte() {
             const matte = matteinput.value;
@@ -1133,18 +1236,30 @@ function buttonweiter() {
         halteTimerW.setSchedule(() => {
             punkteweis -= 5; // Remove Waza-ari points
             ipponweis(); // Award Ippon after 20 seconds
-            if (punkteweis >= 20 || halteTimerW.getTime() >= 20000) {
+            if (halteTimerW.getTime() >= 20000) {
                 buzzer.play(); // Play sound if 20 points are reached due to Haltegriff or 20 seconds reached
             }
             updatePunkteW();
+            // Prüfen, ob der Kampf beendet werden soll
+            if (hauptTimer.getTime() >= kampfzeit || punkteweis >= 20 || punkteblau >= 20) {
+                hauptTimer.pause();
+                updateHauptTimer();
+                weiterbutton.classList.remove("hidden"); // Weiterbutton anzeigen
+            };
         }, 20000);
         halteTimerB.setSchedule(() => {
             punkteblau -= 5; // Remove Waza-ari points
             ipponblau(); // Award Ippon after 20 seconds
-            if (punkteblau >= 20 || halteTimerB.getTime() >= 20000) {
+            if (halteTimerB.getTime() >= 20000) {
                 buzzer.play(); // Play sound if 20 points are reached due to Haltegriff or 20 seconds reached
             }
             updatePunkteB();
+            // Prüfen, ob der Kampf beendet werden soll
+            if (hauptTimer.getTime() >= kampfzeit || punkteweis >= 20 || punkteblau >= 20) {
+                hauptTimer.pause();
+                updateHauptTimer();
+                weiterbutton.classList.remove("hidden"); // Weiterbutton anzeigen
+            };
         }, 20000);
 
         function kampfEnde() {
@@ -1562,6 +1677,35 @@ if (typeof require !== 'undefined') {
 });
 
 }
+// Funktion zum Zurücksetzen der Anwendung
+function resetApp() {
+    // Speichern der Mattennummer und Anfangszeit im localStorage
+    localStorage.setItem('matteNumber', matteinput.value || "1");
+    localStorage.setItem('startzeit', haupttimerinput.value || "2:00");
+    
+    // Seite neu laden
+    window.location.reload();
+}
+
+// Event-Listener für den Reset-Button
+document.getElementById('resetButton').addEventListener('click', function() {
+    if (confirm("Anwendung neu starten? Aktuelle Daten gehen verloren.")) {
+        resetApp();
+    }
+});
+
+// Tastenkombination für Reset (Strg+R)
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === 'r') {
+        // Verhindern des Standard-Browser-Verhaltens (Seite neu laden)
+        event.preventDefault();
+        
+        if (confirm("Anwendung neu starten? Aktuelle Daten gehen verloren.")) {
+            resetApp();
+        }
+    }
+});
+
 
     </script>
 </head>
@@ -1592,6 +1736,7 @@ if (typeof require !== 'undefined') {
         <button id="show-animation" class="animation-button" onclick="playMatteAnimation()">Pause ☕</button>
 
       </div>   
+      <button id="resetButton" class="resetbutton">🔄 Hard Reset</button>
       <button id="kampfStartenButton" class="kampfStartenButton onlymain hidden" onclick="startKampf()">Kampf starten</button>
 
   
