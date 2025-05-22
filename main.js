@@ -105,7 +105,7 @@ function createWindows() {
       
       // Standard-Zoom um zwei Stufen erhöhen
       secondWindow.webContents.on('did-finish-load', () => {
-        secondWindow.webContents.setZoomFactor(1.2);
+        secondWindow.webContents.setZoomFactor(1.3);
       });
     }
   }
@@ -160,7 +160,7 @@ function createWindows() {
   ipcMain.on('zoom-reset', () => {
     console.log('Zoom reset requested for secondary window');
     if (secondWindow && !secondWindow.isDestroyed()) {
-      secondWindow.webContents.setZoomFactor(1.0);
+      secondWindow.webContents.setZoomFactor(1.3);
     }
   });
 }
