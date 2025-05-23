@@ -631,6 +631,9 @@ window.onload = function() {
     }
 };
 
+// Set up a timer to periodically check if the weiterbutton should be shown
+setInterval(checkAndShowWeiterButton, 500); // Check every 2 seconds
+
 // Überschreibe die showMattenModal-Funktion, um gespeicherte Werte zu berücksichtigen
 const originalShowMattenModal = window.showMattenModal;
 window.showMattenModal = function() {
@@ -1592,6 +1595,18 @@ function showMattenModal() {
       });
     }
   }
+}
+
+function checkAndShowWeiterButton() {
+    // Check if either player has 20+ points AND the timer is paused
+    if (hauptTimer.paused() && (punkteblau >= 20 || punkteweis >= 20)) {
+        weiterbutton.classList.remove("hidden"); // Show the weiterbutton
+    }
+    
+    // Also show button if match time has elapsed
+    if (hauptTimer.getTime() >= kampfzeit && hauptTimer.paused()) {
+        weiterbutton.classList.remove("hidden");
+    }
 }
 
 // Function to handle the submission of the Matten Nummer

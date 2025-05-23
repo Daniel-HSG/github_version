@@ -1,6 +1,6 @@
 {
     "name": "judo-scoreboard",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Judo Scoreboard Application",
     "main": "main.js",
     "scripts": {
